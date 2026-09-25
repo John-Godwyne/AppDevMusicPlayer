@@ -1,53 +1,45 @@
 import controller.PlayerController;
 import events.SongChangeEvent;
 import events.SongChangeListener;
-import model.Playlist;
 import model.Song;
-import persistence.DatabaseManager;
+import persistence.FileManager;
 import view.MainFrame;
 
 import javax.swing.*;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        // 1. Initialize JPA Database
-        DatabaseManager.init();
+        
+        // 1. Create dummy data if file doesn't exist
+        seedDataIfEmpty();
 
-        // 2. Seed Database with dummy data if it's empty (For testing!)
-        if (DatabaseManager.getAllSongs().isEmpty()) {
-            seedDatabase();
-        }
-
-        // 3. Start the Swing GUI
+        // 2. Start GUI
         SwingUtilities.invokeLater(() -> {
             MainFrame view = new MainFrame();
-            Playlist playlist = new Playlist("My Favorites");
-            
-            PlayerController controller = new PlayerController(view, playlist);
+            PlayerController controller = new PlayerController(view);
 
-            // 4. Add Custom Event Listener to update Lyrics and Image
+            // 3. Add Custom Event Listener (Updates UI when song changes)
             controller.addSongChangeListener(new SongChangeListener() {
                 @Override
                 public void songChanged(SongChangeEvent event) {
                     Song song = event.getSong();
-                    
+
                     // Update Image
                     if (song.getImagePath() != null && new File(song.getImagePath()).exists()) {
                         ImageIcon icon = new ImageIcon(song.getImagePath());
-                        // Scale image to fit the label
                         java.awt.Image img = icon.getImage().getScaledInstance(300, 300, java.awt.Image.SCALE_SMOOTH);
-                        view.getPlayerPanel().getImageLabel().setIcon(new ImageIcon(img));
-                        view.getPlayerPanel().getImageLabel().setText("");
+                        view.playerPanel.imageLabel.setIcon(new ImageIcon(img));
+                        view.playerPanel.imageLabel.setText("");
                     } else {
-                        view.getPlayerPanel().getImageLabel().setIcon(null);
-                        view.getPlayerPanel().getImageLabel().setText("No Image Found");
+                        view.playerPanel.imageLabel.setIcon(null);
+                        view.playerPanel.imageLabel.setText("Image Not Found");
                     }
 
                     // Update Lyrics
-                    view.getPlayerPanel().getLyricsArea().setText(song.getLyrics());
+                    view.playerPanel.lyricsArea.setText(song.getLyrics());
                 }
             });
 
@@ -55,14 +47,17 @@ public class Main {
         });
     }
 
-    // Helper method to put 5 songs in the DB so you can test immediately
-    private static void seedDatabase() {
-        // NOTE: You need to create these folders and put dummy files in them!
-        DatabaseManager.saveSong(new Song("Song One", "Artist A", "src/resources/audio/song1.mp3", "src/resources/images/cover1.jpg"));
-        DatabaseManager.saveSong(new Song("Song Two", "Artist B", "src/resources/audio/song2.mp3", "src/resources/images/cover2.jpg"));
-        DatabaseManager.saveSong(new Song("Song Three", "Artist C", "src/resources/audio/song3.mp3", "src/resources/images/cover3.jpg"));
-        DatabaseManager.saveSong(new Song("Song Four", "Artist D", "src/resources/audio/song4.mp3", "src/resources/images/cover4.jpg"));
-        DatabaseManager.saveSong(new Song("Song Five", "Artist E", "src/resources/audio/song5.mp3", "src/resources/images/cover5.jpg"));
-        System.out.println("Database seeded with 5 songs.");
+    private static void seedDataIfEmpty() {
+        File file = new File("songs_data.txt");
+        if (!file.exists()) {
+            List<Song> dummySongs = new ArrayList<>();
+            // NOTE: These paths must exist on your computer!
+            dummySongs.add(new Song("Song 1", "Artist A", "src/audio/song1.wav", "src/images/cover1.jpg", "Lyrics for song 1..."));
+            dummySongs.add(new Song("Song 2", "Artist B", "src/audio/song2.wav", "src/images/cover2.jpg", "Lyrics for song 2..."));
+            dummySongs.add(new Song("Song 3", "Artist C", "src/audio/song3.wav", "src/images/cover3.jpg", "Lyrics for song 3..."));
+            dummySongs.add(new Song("Song 4", "Artist D", "src/audio/song4.wav", "src/images/cover4.jpg", "Lyrics for song 4..."));
+            dummySongs.add(new Song("Song 5", "Artist E", "src/audio/song5.wav", "src/images/cover5.jpg", "Lyrics for song 5..."));
+            FileManager.saveSongs(dummySongs);
+        }
     }
 }

@@ -1,91 +1,51 @@
 package controller;
 
-import javazoom.jl.player.Player;
-import java.io.FileInputStream;
+import javax.sound.sampled.*;
+import java.io.File;
 
 public class AudioEngine {
-    private Player player;
-    private Thread playThread;
-    private FileInputStream fileInputStream;
+    private Clip clip;
+    private long pausePosition = 0;
     private boolean isPaused = false;
-    private long pauseLocation = 0;
-    private String currentFilePath;
 
-    // Play a new song
     public void play(String filePath) {
         try {
-            stop(); // Stop any currently playing song
-            this.currentFilePath = filePath;
-            this.fileInputStream = new FileInputStream(filePath);
-            this.player = new Player(fileInputStream);
-            
-            playThread = new Thread(() -> {
-                try {
-                    player.play();
-                } catch (Exception e) {
-                    System.out.println("Error playing audio: " + e.getMessage());
-                }
-            });
-            playThread.start();
+            stop(); // Stop current
+            File audioFile = new File(filePath);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.start();
             isPaused = false;
-            System.out.println("Playing: " + filePath);
         } catch (Exception e) {
-            System.out.println("Error starting audio: " + e.getMessage());
+            System.out.println("Error playing audio (Make sure it's a .wav file): " + e.getMessage());
         }
     }
 
-    // Pause the song
     public void pause() {
-        if (player != null && !isPaused) {
-            try {
-                // JLayer doesn't have a native pause, so we calculate where we are and stop
-                pauseLocation = fileInputStream.available();
-                player.close();
-                isPaused = true;
-                System.out.println("Paused");
-            } catch (Exception e) {
-                System.out.println("Error pausing: " + e.getMessage());
-            }
+        if (clip != null && clip.isRunning()) {
+            pausePosition = clip.getMicrosecondPosition();
+            clip.stop();
+            isPaused = true;
         }
     }
 
-    // Resume the song from where it was paused
     public void resume() {
-        if (isPaused && currentFilePath != null) {
-            try {
-                fileInputStream = new FileInputStream(currentFilePath);
-                // Skip to the point where we paused
-                fileInputStream.skip(fileInputStream.available() - pauseLocation);
-                player = new Player(fileInputStream);
-                
-                playThread = new Thread(() -> {
-                    try {
-                        player.play();
-                    } catch (Exception e) {
-                        System.out.println("Error resuming audio: " + e.getMessage());
-                    }
-                });
-                playThread.start();
-                isPaused = false;
-                System.out.println("Resumed");
-            } catch (Exception e) {
-                System.out.println("Error resuming: " + e.getMessage());
-            }
+        if (clip != null && isPaused) {
+            clip.setMicrosecondPosition(pausePosition);
+            clip.start();
+            isPaused = false;
         }
     }
 
-    // Stop the song entirely
     public void stop() {
-        if (player != null) {
-            player.close();
-            player = null;
+        if (clip != null && clip.isOpen()) {
+            clip.stop();
+            clip.close();
             isPaused = false;
-            pauseLocation = 0;
-            System.out.println("Stopped");
+            pausePosition = 0;
         }
     }
     
-    public boolean isPaused() {
-        return isPaused;
-    }
+    public boolean isPaused() { return isPaused; }
 }
