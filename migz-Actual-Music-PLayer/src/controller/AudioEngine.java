@@ -10,7 +10,7 @@ public class AudioEngine {
 
     public void play(String filePath) {
         try {
-            stop(); // Stop current
+            stop(); 
             File audioFile = new File(filePath);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
             clip = AudioSystem.getClip();
@@ -18,7 +18,7 @@ public class AudioEngine {
             clip.start();
             isPaused = false;
         } catch (Exception e) {
-            System.out.println("Error playing audio (Make sure it's a .wav file): " + e.getMessage());
+            System.out.println("Error playing audio. Make sure it is a .wav file! " + e.getMessage());
         }
     }
 

@@ -4,7 +4,7 @@ import events.SongChangeEvent;
 import events.SongChangeListener;
 import model.Playlist;
 import model.Song;
-import persistence.FileManager;
+import persistence.DatabaseManager;
 import view.MainFrame;
 import view.PlayerPanel;
 
@@ -27,11 +27,11 @@ public class PlayerController {
         this.playlist = new Playlist();
         this.audioEngine = new AudioEngine();
 
-        // Load saved songs from file
-        List<Song> savedSongs = FileManager.loadSongs();
-        for (Song s : savedSongs) {
+        // 1. Load songs from JPA Database
+        List<Song> dbSongs = DatabaseManager.getAllSongs();
+        for (Song s : dbSongs) {
             playlist.addSong(s);
-            panel.listModel.addElement(s.toString());
+            panel.listModel.addElement(s.toString()); 
         }
 
         initController();
@@ -49,7 +49,7 @@ public class PlayerController {
     }
 
     private void initController() {
-        // Song Selection
+        // Selection Event
         panel.songList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -60,7 +60,7 @@ public class PlayerController {
             }
         });
 
-        // Buttons
+        // Button Events
         panel.playButton.addActionListener(e -> {
             int index = panel.songList.getSelectedIndex();
             if (index != -1) {
