@@ -28,3 +28,15 @@ migz-Actual-Music-PLayer/
 │   ├── Constants.java
 │   └── Main.java      # Entry point
 └── README.md
+
+## 👥 Team Roles & Contributions
+
+This project was completed by a team of 5 members. Work was divided based on the MVC architecture and the grading rubric:
+
+| Member | Role | Primary Responsibilities | Rubric Focus |
+| :--- | :--- | :--- | :--- |
+| **Member 1** | Project Lead & Backend | MVC structure, JPA/H2 Database, Audio Engine, Lib management | MVC (30), JPA (30), Complexity (20) |
+| **Member 2** | UI/UX Designer | Swing GUI, Layout Managers, Styling, Responsive resizing | UI/UX (20), Layout Managers (30) |
+| **Member 3** | Data & Content Manager | 5 .wav files, 5 .jpg images, lyrics, seedDatabase() | Minimum Reqs, Complexity (20) |
+| **Member 4** | Controller & Event Specialist | Custom Events, PlayerController, Next/Prev buttons, Progress Slider | Custom Events (30), Complexity (20) |
+| **Member 5** | QA Tester & Presenter | Edge case testing, README, .gitignore, Video Demo | Demo (10), Uniqueness (20) |
