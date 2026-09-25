@@ -28,6 +28,7 @@ migz-Actual-Music-PLayer/
 │   ├── Constants.java
 │   └── Main.java      # Entry point
 └── README.md
+```
 
 ## 👥 Team Roles & Contributions
 
