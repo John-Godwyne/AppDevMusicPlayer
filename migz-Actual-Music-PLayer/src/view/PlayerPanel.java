@@ -1,14 +1,15 @@
 package view;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class PlayerPanel extends JPanel {
     public JLabel imageLabel;
     public JTextArea lyricsArea;
     public JList<String> songList;
     public DefaultListModel<String> listModel;
-    public JButton playButton, pauseButton, stopButton;
+    public JButton playButton, pauseButton, stopButton, prevButton, nextButton; // ADDED prevButton, nextButton
+    public JSlider progressSlider; // ADDED
 
     public PlayerPanel() {
         setLayout(new BorderLayout(10, 10));
@@ -37,14 +38,26 @@ public class PlayerPanel extends JPanel {
         lyricsScroll.setBorder(BorderFactory.createTitledBorder("Lyrics"));
         add(lyricsScroll, BorderLayout.EAST);
 
-        // SOUTH: Controls
+        // SOUTH: Slider + Controls
+        JPanel southPanel = new JPanel(new BorderLayout(5, 5)); // ADDED wrapper
+
+        progressSlider = new JSlider(0, 100, 0); // ADDED
+        southPanel.add(progressSlider, BorderLayout.NORTH); // ADDED
+
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        prevButton = new JButton("⏮ Prev"); // ADDED
         playButton = new JButton("▶ Play");
         pauseButton = new JButton("⏸ Pause");
         stopButton = new JButton("⏹ Stop");
+        nextButton = new JButton("⏭ Next"); // ADDED
+
+        controls.add(prevButton); // ADDED
         controls.add(playButton);
         controls.add(pauseButton);
         controls.add(stopButton);
-        add(controls, BorderLayout.SOUTH);
+        controls.add(nextButton); // ADDED
+
+        southPanel.add(controls, BorderLayout.CENTER); // CHANGED from add(controls, BorderLayout.SOUTH)
+        add(southPanel, BorderLayout.SOUTH); // CHANGED
     }
 }

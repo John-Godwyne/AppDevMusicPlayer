@@ -1,7 +1,7 @@
 package controller;
 
-import javax.sound.sampled.*;
 import java.io.File;
+import javax.sound.sampled.*;
 
 public class AudioEngine {
     private Clip clip;
@@ -10,7 +10,7 @@ public class AudioEngine {
 
     public void play(String filePath) {
         try {
-            stop(); 
+            stop();
             File audioFile = new File(filePath);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
             clip = AudioSystem.getClip();
@@ -46,6 +46,28 @@ public class AudioEngine {
             pausePosition = 0;
         }
     }
-    
+
     public boolean isPaused() { return isPaused; }
+
+    // NEW: for the progress slider
+    public boolean isPlaying() {
+        return clip != null && clip.isRunning();
+    }
+
+    public long getPositionMicros() {
+        return clip != null ? clip.getMicrosecondPosition() : 0;
+    }
+
+    public long getDurationMicros() {
+        return clip != null ? clip.getMicrosecondLength() : 0;
+    }
+
+    public void seekMicros(long micros) {
+        if (clip != null) {
+            boolean wasRunning = clip.isRunning();
+            clip.stop();
+            clip.setMicrosecondPosition(micros);
+            if (wasRunning) clip.start();
+        }
+    }
 }
