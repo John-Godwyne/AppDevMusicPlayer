@@ -57,6 +57,11 @@ public class PlayerController {
         currentIndex = index;
         panel.songList.setSelectedIndex(index);
         Song song = playlist.getSongs().get(index);
+        
+        // Load lyrics from file dynamically
+        String lyricsPath = "resources/lyrics/" + song.getTitle() + ".txt";
+        song.setLyrics(persistence.LyricsLoader.loadLyrics(lyricsPath));
+        
         audioEngine.play(song.getFilePath());
         fireSongChangeEvent(song, SongChangeEvent.Type.TRACK_CHANGED);
         fireSongChangeEvent(song, SongChangeEvent.Type.PLAYING);
@@ -146,9 +151,17 @@ public class PlayerController {
                 if (duration > 0) {
                     int percent = (int) ((position * 100) / duration);
                     panel.progressSlider.setValue(percent);
+                    panel.timeLabel.setText(formatTime(position) + " / " + formatTime(duration));
                 }
             }
         });
         progressTimer.start();
+    }
+
+    private String formatTime(long micros) {
+        long totalSec = micros / 1_000_000;
+        long min = totalSec / 60;
+        long sec = totalSec % 60;
+        return String.format("%02d:%02d", min, sec);
     }
 }

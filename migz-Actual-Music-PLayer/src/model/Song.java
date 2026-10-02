@@ -1,10 +1,10 @@
 package model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 
 @Entity
 public class Song {
@@ -17,10 +17,11 @@ public class Song {
     private String filePath;
     private String imagePath;
     
-    @Transient // We don't want a massive string in the DB
+    // CHANGED: Use TEXT column to allow long lyrics (up to 65,000 chars)
+    @Column(columnDefinition = "TEXT")
     private String lyrics;
 
-    public Song() {} // JPA requires an empty constructor
+    public Song() {} 
 
     public Song(String title, String artist, String filePath, String imagePath, String lyrics) {
         this.title = title;
@@ -30,13 +31,14 @@ public class Song {
         this.lyrics = lyrics;
     }
 
-    // Getters and Setters (Generate these quickly in VS Code: Right-click -> Source Action -> Generate Getters and Setters)
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getArtist() { return artist; }
     public String getFilePath() { return filePath; }
     public String getImagePath() { return imagePath; }
     public String getLyrics() { return lyrics; }
+    
+    public void setLyrics(String lyrics) { this.lyrics = lyrics; }
 
     @Override
     public String toString() { return title + " - " + artist; }

@@ -34,6 +34,18 @@ public class DatabaseManager {
         }
     }
     
+    // ADDED: This clears the old data so we can start fresh
+    public static void clearAllSongs() {
+        EntityManager em = factory.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.createQuery("DELETE FROM Song").executeUpdate();
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+    
     public static void close() {
         if (factory != null && factory.isOpen()) {
             factory.close();
