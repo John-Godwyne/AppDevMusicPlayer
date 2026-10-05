@@ -24,7 +24,7 @@ public class PlayerPanel extends JPanel {
     private final Color ACCENT = new Color(88, 101, 242);       // Discord-like blue
     private final Color ACCENT_HOVER = new Color(114, 125, 245);
     private final Color BORDER = new Color(70, 70, 80);
-
+    private final Font symbol = new Font(Font.DIALOG, Font.BOLD, 14);
     public PlayerPanel() {
         setLayout(new BorderLayout(15, 15));
         setBorder(new EmptyBorder(18, 18, 18, 18));
@@ -45,8 +45,8 @@ public class PlayerPanel extends JPanel {
         JScrollPane listScroll = new JScrollPane(songList);
         listScroll.setPreferredSize(new Dimension(260, 0));
         listScroll.setBorder(BorderFactory.createTitledBorder(
-            new LineBorder(BORDER, 1, true), "🎵 Playlist", 0, 0, 
-            new Font("Segoe UI", Font.BOLD, 14), TEXT_LIGHT));
+            new LineBorder(BORDER, 1, true), "𝅘𝅥𝅮 Playlist", 0, 0, 
+            symbol, TEXT_LIGHT));
         listScroll.getViewport().setBackground(BG_PANEL);
         listScroll.setBackground(BG_PANEL);
         add(listScroll, BorderLayout.WEST);
@@ -64,8 +64,8 @@ public class PlayerPanel extends JPanel {
         centerPanel.add(imageLabel, BorderLayout.CENTER);
         
         // Now Playing label
-        nowPlayingLabel = new JLabel("♪ Nothing playing", SwingConstants.CENTER);
-        nowPlayingLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        nowPlayingLabel = new JLabel("𝅘𝅥𝅮 Nothing playing", SwingConstants.CENTER);
+        nowPlayingLabel.setFont(symbol);
         nowPlayingLabel.setForeground(TEXT_LIGHT);
         nowPlayingLabel.setBorder(new EmptyBorder(8, 0, 0, 0));
         centerPanel.add(nowPlayingLabel, BorderLayout.SOUTH);
@@ -87,8 +87,8 @@ public class PlayerPanel extends JPanel {
         JScrollPane lyricsScroll = new JScrollPane(lyricsArea);
         lyricsScroll.setPreferredSize(new Dimension(300, 0));
         lyricsScroll.setBorder(BorderFactory.createTitledBorder(
-            new LineBorder(BORDER, 1, true), "📜 Lyrics", 0, 0, 
-            new Font("Segoe UI", Font.BOLD, 14), TEXT_LIGHT));
+            new LineBorder(BORDER, 1, true), "🗎 Lyrics", 0, 0, 
+            symbol, TEXT_LIGHT));
         lyricsScroll.getViewport().setBackground(BG_PANEL);
         lyricsScroll.setBackground(BG_PANEL);
         add(lyricsScroll, BorderLayout.EAST);
@@ -137,7 +137,7 @@ public class PlayerPanel extends JPanel {
     // Helper method to create modern-looking buttons
     private JButton createStyledButton(String text, int width) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFont(new Font(Font.DIALOG, Font.BOLD, 13));
         button.setForeground(Color.WHITE);
         button.setBackground(ACCENT);
         button.setFocusPainted(false);
