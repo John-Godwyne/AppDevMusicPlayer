@@ -4,27 +4,30 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import view.ImagePanel;
 
 public class PlayerPanel extends JPanel {
-    public JLabel imageLabel;
+    public ImagePanel imagePanel;
     public JLabel nowPlayingLabel;
     public JLabel timeLabel;
+    public JLabel volumeLabel;         // <-- ADDED: volume % display
     public JTextArea lyricsArea;
     public JList<String> songList;
     public DefaultListModel<String> listModel;
-    public JButton playButton, pauseButton, stopButton, prevButton, nextButton;
+    public JButton playButton, stopButton, prevButton, nextButton;
     public JSlider progressSlider;
+    public JSlider volumeSlider;       // <-- ADDED: volume slider
 
     // Theme Colors
     private final Color BG_DARK = new Color(24, 24, 28);
     private final Color BG_PANEL = new Color(38, 38, 44);
-    private final Color BG_ELEVATED = new Color(52, 52, 60);
     private final Color TEXT_LIGHT = new Color(235, 235, 240);
     private final Color TEXT_MUTED = new Color(150, 150, 160);
-    private final Color ACCENT = new Color(88, 101, 242);       // Discord-like blue
+    private final Color ACCENT = new Color(88, 101, 242);
     private final Color ACCENT_HOVER = new Color(114, 125, 245);
     private final Color BORDER = new Color(70, 70, 80);
     private final Font symbol = new Font(Font.DIALOG, Font.BOLD, 14);
+
     public PlayerPanel() {
         setLayout(new BorderLayout(15, 15));
         setBorder(new EmptyBorder(18, 18, 18, 18));
@@ -54,14 +57,14 @@ public class PlayerPanel extends JPanel {
         // ================= CENTER: Album Art =================
         JPanel centerPanel = new JPanel(new BorderLayout(0, 10));
         centerPanel.setBackground(BG_DARK);
+        // Prefer to be as wide as possible
+        centerPanel.setPreferredSize(new Dimension(500, 0));
         
-        imageLabel = new JLabel("Select a song to begin", SwingConstants.CENTER);
-        imageLabel.setFont(new Font("Segoe UI", Font.ITALIC, 16));
-        imageLabel.setForeground(TEXT_MUTED);
-        imageLabel.setBackground(BG_PANEL);
-        imageLabel.setOpaque(true);
-        imageLabel.setBorder(new LineBorder(BORDER, 1, true));
-        centerPanel.add(imageLabel, BorderLayout.CENTER);
+        imagePanel = new ImagePanel();
+        imagePanel.setPlaceholder("Select a song to begin");
+        // Let ImagePanel take all remaining vertical space in the center panel
+        imagePanel.setPreferredSize(new Dimension(400, 400));
+        centerPanel.add(imagePanel, BorderLayout.CENTER);
         
         // Now Playing label
         nowPlayingLabel = new JLabel("𝅘𝅥𝅮 Nothing playing", SwingConstants.CENTER);
@@ -70,8 +73,8 @@ public class PlayerPanel extends JPanel {
         nowPlayingLabel.setBorder(new EmptyBorder(8, 0, 0, 0));
         centerPanel.add(nowPlayingLabel, BorderLayout.SOUTH);
         
+        // Add centerPanel to the middle of the outer panel so it expands
         add(centerPanel, BorderLayout.CENTER);
-
         // ================= EAST: Lyrics =================
         lyricsArea = new JTextArea();
         lyricsArea.setEditable(false);
@@ -93,40 +96,64 @@ public class PlayerPanel extends JPanel {
         lyricsScroll.setBackground(BG_PANEL);
         add(lyricsScroll, BorderLayout.EAST);
 
-        // ================= SOUTH: Slider + Controls =================
+        // ================= SOUTH: Slider + Volume + Controls =================
         JPanel southPanel = new JPanel(new BorderLayout(10, 12));
         southPanel.setBackground(BG_DARK);
 
-        // Time + Slider
+        // Row 1: Progress slider (center) + Time (east) + Volume (west)
         JPanel sliderPanel = new JPanel(new BorderLayout(10, 0));
         sliderPanel.setBackground(BG_DARK);
-        
+
+        // ---- Progress time on the right ----
         timeLabel = new JLabel("00:00 / 00:00");
         timeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         timeLabel.setForeground(TEXT_MUTED);
         sliderPanel.add(timeLabel, BorderLayout.EAST);
-        
+
+        // ---- Progress slider in center ----
         progressSlider = new JSlider(0, 100, 0);
         progressSlider.setBackground(BG_DARK);
         progressSlider.setForeground(ACCENT);
         progressSlider.setFocusable(false);
         sliderPanel.add(progressSlider, BorderLayout.CENTER);
-        
+
+        // ---- Volume group on the left ----
+        JPanel volumePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        volumePanel.setBackground(BG_DARK);
+
+        JLabel volumeIcon = new JLabel("🔊");
+        volumeIcon.setFont(new Font(Font.DIALOG, Font.PLAIN, 16));
+        volumeIcon.setForeground(TEXT_LIGHT);
+        volumePanel.add(volumeIcon);
+
+        volumeSlider = new JSlider(0, 100, 80); // default 80%
+        volumeSlider.setPreferredSize(new Dimension(120, 25));
+        volumeSlider.setBackground(BG_DARK);
+        volumeSlider.setForeground(ACCENT);
+        volumeSlider.setFocusable(false);
+        volumePanel.add(volumeSlider);
+
+        volumeLabel = new JLabel("80%");
+        volumeLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        volumeLabel.setForeground(TEXT_MUTED);
+        volumeLabel.setPreferredSize(new Dimension(40, 20)); // fixed width to stop jumpy layout
+        volumePanel.add(volumeLabel);
+
+        sliderPanel.add(volumePanel, BorderLayout.WEST);
+
         southPanel.add(sliderPanel, BorderLayout.NORTH);
 
-        // Buttons
+        // Row 2: Playback buttons
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
         controls.setBackground(BG_DARK);
 
         prevButton = createStyledButton("⏮", 60);
-        playButton = createStyledButton("▶ Play", 110);
-        pauseButton = createStyledButton("⏸ Pause", 110);
+        playButton = createStyledButton("▶ Play", 120);
         stopButton = createStyledButton("⏹ Stop", 110);
         nextButton = createStyledButton("⏭", 60);
 
         controls.add(prevButton);
         controls.add(playButton);
-        controls.add(pauseButton);
         controls.add(stopButton);
         controls.add(nextButton);
 

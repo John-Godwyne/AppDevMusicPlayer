@@ -38,6 +38,13 @@ public class PlayerController {
         }
 
         initController();
+        // Volume slider: update audio volume + display % when dragged
+        panel.volumeSlider.addChangeListener(e -> {
+            int value = panel.volumeSlider.getValue();
+            float volume = value / 100f;
+            audioEngine.setVolume(volume);
+            panel.volumeLabel.setText(value + "%");
+        });
         initProgressTimer();
     }
 
@@ -63,6 +70,7 @@ public class PlayerController {
         song.setLyrics(persistence.LyricsLoader.loadLyrics(lyricsPath));
         
         audioEngine.play(song.getFilePath());
+        panel.playButton.setText("⏸ Pause"); // Reflect current playing state
         fireSongChangeEvent(song, SongChangeEvent.Type.TRACK_CHANGED);
         fireSongChangeEvent(song, SongChangeEvent.Type.PLAYING);
     }
@@ -79,7 +87,9 @@ public class PlayerController {
             }
         });
 
+        // ============ COMBINED PLAY / PAUSE TOGGLE ============
         panel.playButton.addActionListener(e -> {
+            // If nothing loaded, select the highlighted song
             if (currentIndex == -1) {
                 int index = panel.songList.getSelectedIndex();
                 if (index != -1) {
@@ -89,24 +99,31 @@ public class PlayerController {
                 }
                 return;
             }
+
             Song current = playlist.getSongs().get(currentIndex);
+
             if (audioEngine.isPaused()) {
+                // PAUSED -> resume, switch label to Pause
                 audioEngine.resume();
+                panel.playButton.setText("⏸ Pause");
+                fireSongChangeEvent(current, SongChangeEvent.Type.PLAYING);
+            } else if (audioEngine.isPlaying()) {
+                // PLAYING -> pause, switch label to Play
+                audioEngine.pause();
+                panel.playButton.setText("▶ Play");
+                fireSongChangeEvent(current, SongChangeEvent.Type.PAUSED);
             } else {
+                // STOPPED -> play from beginning, switch label to Pause
                 audioEngine.play(current.getFilePath());
-            }
-            fireSongChangeEvent(current, SongChangeEvent.Type.PLAYING);
-        });
-
-        panel.pauseButton.addActionListener(e -> {
-            audioEngine.pause();
-            if (currentIndex != -1) {
-                fireSongChangeEvent(playlist.getSongs().get(currentIndex), SongChangeEvent.Type.PAUSED);
+                panel.playButton.setText("⏸ Pause");
+                fireSongChangeEvent(current, SongChangeEvent.Type.PLAYING);
             }
         });
 
+        // Stop button
         panel.stopButton.addActionListener(e -> {
             audioEngine.stop();
+            panel.playButton.setText("▶ Play"); // Reset toggle label
             if (currentIndex != -1) {
                 fireSongChangeEvent(playlist.getSongs().get(currentIndex), SongChangeEvent.Type.STOPPED);
             }

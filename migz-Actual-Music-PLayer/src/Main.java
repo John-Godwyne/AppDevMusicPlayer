@@ -48,15 +48,12 @@ public class Main {
                     // Update Now Playing label
                     view.playerPanel.nowPlayingLabel.setText("♪ " + song.getTitle() + " — " + song.getArtist());
 
-                    // Update Image
+                    // Update Image5
                     if (song.getImagePath() != null && new File(song.getImagePath()).exists()) {
                         ImageIcon icon = new ImageIcon(song.getImagePath());
-                        Image img = icon.getImage().getScaledInstance(400, 400, Image.SCALE_SMOOTH);
-                        view.playerPanel.imageLabel.setIcon(new ImageIcon(img));
-                        view.playerPanel.imageLabel.setText("");
+                        view.playerPanel.imagePanel.setImage(icon.getImage());
                     } else {
-                        view.playerPanel.imageLabel.setIcon(null);
-                        view.playerPanel.imageLabel.setText("Image Not Found");
+                        view.playerPanel.imagePanel.setPlaceholder("Image Not Found");
                     }
 
                     // Update Lyrics
