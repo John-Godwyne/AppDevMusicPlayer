@@ -1,7 +1,7 @@
 package view;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class ImagePanel extends JPanel {
     private Image originalImage;
@@ -47,7 +47,7 @@ public class ImagePanel extends JPanel {
             // ==== CROP-TO-FILL ====
             // Use Math.max instead of Math.min so the image fills the panel
             // and overflows on the shorter side. The overflow is then cropped.
-            double scale = Math.max(
+            double scale = Math.min(
                 (double) panelWidth / imgWidth,
                 (double) panelHeight / imgHeight
             );
