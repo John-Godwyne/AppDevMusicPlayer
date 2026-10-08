@@ -4,7 +4,9 @@ import events.SongChangeListener;
 import model.Song;
 import persistence.DatabaseManager;
 import view.MainFrame;
-
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -66,42 +68,48 @@ public class Main {
         });
     }
 
-    private static void seedDatabase() {
-        DatabaseManager.saveSong(new Song(
-            "A Man Without Love", "Engelbert Humperdinck",
-            "resources/audio/A Man Without Love.wav",
-            "resources/images/A Man Without Love.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/A Man Without Love.txt")
-        ));
-        
-        DatabaseManager.saveSong(new Song(
-            "Human ft. SF-A2 Miki", "PinocchioP",
-            "resources/audio/Human ft. SF-A2 Miki.wav",
-            "resources/images/Human ft. SF-A2 Miki.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/Human ft. SF-A2 Miki.txt")
-        ));
-        
-        DatabaseManager.saveSong(new Song(
-            "Isang Pag-Ibig", "APO Hiking Society",
-            "resources/audio/Isang Pag-Ibig.wav",
-            "resources/images/Isang Pag-Ibig.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/Isang Pag-Ibig.txt")
-        ));
-        
-        DatabaseManager.saveSong(new Song(
-            "Multo", "Cup of Joe",
-            "resources/audio/Multo.wav",
-            "resources/images/Multo.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/Multo.txt")
-        ));
-        
-        DatabaseManager.saveSong(new Song(
-            "Pompeii", "Bastille",
-            "resources/audio/Pompeii.wav",
-            "resources/images/Pompeii.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/Pompeii.txt")
-        ));
-        
-        System.out.println("Database seeded with 5 songs.");
+    private static String findAsset(String dir, String base, String ext) {
+    if (new File(dir + base + ext).exists()) return dir + base + ext;
+    for (String part : base.split(" - ")) {
+        String p = dir + part.trim() + ext;
+        if (new File(p).exists()) return p;
     }
-}
+    return dir + base + ext; }
+
+   private static void seedDatabase() {
+    Map<String, String[]> info = new HashMap<>();
+    try {
+        for (String line : Files.readAllLines(Path.of("resources/artists.txt"))) {
+            String[] p = line.split("\\|", 3);
+            if (p.length >= 2) info.put(p[0].trim(), p);
+        }
+    } catch (IOException e) {
+        System.out.println("No artists.txt found, using defaults.");
+    }
+
+    File[] wavs = new File("resources/audio").listFiles((d, n) -> n.endsWith(".wav"));
+    if (wavs == null) return;
+    Arrays.sort(wavs);
+
+    int count = 0;
+    for (File wav : wavs) {
+        String title = wav.getName().replace(".wav", "");
+        String[] p = info.get(title);
+        String lyricsPath = "resources/lyrics/" + title + ".txt";
+
+        Song song = new Song(
+            title,
+            p != null ? p[1].trim() : "Unknown Artist",
+            "resources/audio/" + title + ".wav",
+            findAsset("resources/images/", title, ".jpg"),
+            new File(lyricsPath).exists()
+                ? persistence.LyricsLoader.loadLyrics(lyricsPath)
+                : "No lyrics available."
+        );
+        if (p != null && p.length == 3) song.setGenre(p[2].trim());
+
+        DatabaseManager.saveSong(song);
+        count++;
+    }
+    System.out.println("Database seeded with " + count + " songs.");
+}}

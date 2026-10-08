@@ -15,6 +15,7 @@ public class Song {
     private String title;
     private String artist;
     private String filePath;
+    private String genre = "Unknown";
     private String imagePath;
     
     // CHANGED: Use TEXT column to allow long lyrics (up to 65,000 chars)
@@ -37,6 +38,8 @@ public class Song {
     public String getFilePath() { return filePath; }
     public String getImagePath() { return imagePath; }
     public String getLyrics() { return lyrics; }
+    public String getGenre() { return genre; }
+    public void setGenre(String genre) { this.genre = genre; }
     
     public void setLyrics(String lyrics) { this.lyrics = lyrics; }
 
