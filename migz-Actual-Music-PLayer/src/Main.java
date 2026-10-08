@@ -86,6 +86,7 @@ public class Main {
     } catch (IOException e) {
         System.out.println("No artists.txt found, using defaults.");
     }
+    System.out.println("Loaded " + info.size() + " artist entries.");   // <-- NEW LINE 1
 
     File[] wavs = new File("resources/audio").listFiles((d, n) -> n.endsWith(".wav"));
     if (wavs == null) return;
@@ -95,6 +96,7 @@ public class Main {
     for (File wav : wavs) {
         String title = wav.getName().replace(".wav", "");
         String[] p = info.get(title);
+        if (p == null) System.out.println("No artist entry for: " + title);   // <-- NEW LINE 2
         String lyricsPath = "resources/lyrics/" + title + ".txt";
 
         Song song = new Song(
