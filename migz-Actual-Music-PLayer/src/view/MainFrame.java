@@ -11,6 +11,7 @@ public class MainFrame extends JFrame {
         setSize(1100, 700); // Slightly bigger for better spacing
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setResizable(false);
         
         // Set the background color of the frame
         getContentPane().setBackground(new Color(30, 30, 30));
