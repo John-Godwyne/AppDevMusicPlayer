@@ -70,7 +70,8 @@ public class PlayerController {
         song.setLyrics(persistence.LyricsLoader.loadLyrics(lyricsPath));
         
         audioEngine.play(song.getFilePath());
-        panel.playButton.setText("⏸ Pause"); // Reflect current playing state
+        panel.setPlaying(true);
+        panel.playButton.setText("[||] Pause"); // Reflect current playing state
         fireSongChangeEvent(song, SongChangeEvent.Type.TRACK_CHANGED);
         fireSongChangeEvent(song, SongChangeEvent.Type.PLAYING);
     }
@@ -105,17 +106,20 @@ public class PlayerController {
             if (audioEngine.isPaused()) {
                 // PAUSED -> resume, switch label to Pause
                 audioEngine.resume();
-                panel.playButton.setText("⏸ Pause");
+                panel.setPlaying(true);   // <-- add
+                panel.playButton.setText("[||] Pause");
                 fireSongChangeEvent(current, SongChangeEvent.Type.PLAYING);
             } else if (audioEngine.isPlaying()) {
                 // PLAYING -> pause, switch label to Play
                 audioEngine.pause();
-                panel.playButton.setText("▶ Play");
+                panel.setPlaying(false);   // <-- add
+                panel.playButton.setText("[>] Play");
                 fireSongChangeEvent(current, SongChangeEvent.Type.PAUSED);
             } else {
                 // STOPPED -> play from beginning, switch label to Pause
                 audioEngine.play(current.getFilePath());
-                panel.playButton.setText("⏸ Pause");
+                panel.setPlaying(true);   // <-- add
+                panel.playButton.setText("[||] Pause");
                 fireSongChangeEvent(current, SongChangeEvent.Type.PLAYING);
             }
         });
