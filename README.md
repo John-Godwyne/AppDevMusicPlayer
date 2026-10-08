@@ -41,3 +41,38 @@ This project was completed by a team of 5 members. Work was divided based on the
 | **FONTANOS** | Data & Content Manager | 5 .wav files, 5 .jpg images, lyrics, seedDatabase() | Minimum Reqs, Complexity (20) |
 | **ABRIO** | Controller & Event Specialist | Custom Events, PlayerController, Next/Prev buttons, Progress Slider | Custom Events (30), Complexity (20) |
 | **DE JESUS** | QA Tester & Presenter | Edge case testing, README, .gitignore, Video Demo | Demo (10), Uniqueness (20) |
+
+
+## How to Run
+
+The Normal Way to run this through VSCode doesn't work, so here is what you do to get this working.
+
+*Prequisites: JDK 17 or Newer ('javac -version' through terminal or CMD to check)
+
+Step 1: ```CRTL + SHIFT + ` ``` to open a terminal  then move to project portal
+
+```powershell
+   cd migz-Actual-Music-PLayer
+```
+
+or 
+
+```powershell
+    cd migz*
+```
+
+Step 2: Compile, Build, and Run
+
+```powershell
+   javac -cp "lib\*" -sourcepath src -d out src\Main.java; if ($?) { java -cp "out;lib\*;src" Main }
+```
+
+Note: If you are on anything other than Windows, here:
+
+```bash
+   javac -cp "lib/*" -sourcepath src -d out src/Main.java && java -cp "out:lib/*:src" Main
+```
+
+Also Note:
+please run it in `migz-Actual-Music-PLayer` and not `/src` everything is under that project folder.
+If you want add more songs, right now you can only add it through dragging the .wav file (and .jpg and .txt files optioanlly) to the appropriate folder.
