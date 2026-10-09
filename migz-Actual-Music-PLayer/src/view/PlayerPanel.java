@@ -10,11 +10,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.plaf.basic.BasicSliderUI;
 
-/**
- * Persona 3 FES themed player panel (sleek HUD style).
- * Call setPlaying(true/false) from your controller to toggle "Dark Hour" mode,
- * which tints the whole UI from cyan to green while a song plays.
- */
 public class PlayerPanel extends JPanel {
     public ImagePanel imagePanel;
     public JLabel nowPlayingLabel;
@@ -26,23 +21,22 @@ public class PlayerPanel extends JPanel {
     public JButton playButton, stopButton, prevButton, nextButton;
     public JSlider progressSlider;
     public JSlider volumeSlider;
+    public JComboBox<String> sortComboBox;   // NEW
 
-    // ---------- Editable words ----------
     private static final String TXT_TRACKS      = "// TRACK SELECT";
     private static final String TXT_LYRICS      = "// LYRICS DATA";
     private static final String TXT_IDLE        = "The Moment is Dark and Silent";
     private static final String TXT_PLACEHOLDER = "Select a Tune to Vibe";
 
-    // ---------- P3 FES palette ----------
-    private final Color BG_TOP          = new Color(1, 6, 20);      // midnight
-    private final Color BG_BOTTOM       = new Color(4, 26, 64);     // menu blue
-    private final Color BG_BOTTOM_DH    = new Color(2, 36, 42);     // Dark Hour teal-black
+    private final Color BG_TOP          = new Color(1, 6, 20);
+    private final Color BG_BOTTOM       = new Color(4, 26, 64);
+    private final Color BG_BOTTOM_DH    = new Color(2, 36, 42);
     private final Color PANEL_FILL      = new Color(5, 18, 46, 205);
     private final Color NAVY            = new Color(2, 10, 30);
     private final Color TEXT_LIGHT      = new Color(230, 250, 255);
     private final Color TEXT_MUTED      = new Color(120, 170, 200);
-    private final Color ICE             = new Color(190, 240, 255); // near-white cyan
-    private final Color MOON            = new Color(255, 236, 160); // moonlight yellow
+    private final Color ICE             = new Color(190, 240, 255);
+    private final Color MOON            = new Color(255, 236, 160);
     private final Color ACCENT          = new Color(0, 170, 230);
     private final Color ACCENT_HOVER    = new Color(120, 225, 255);
     private final Color DARK_HOUR       = new Color(120, 255, 170);
@@ -70,7 +64,7 @@ public class PlayerPanel extends JPanel {
         setBorder(new EmptyBorder(18, 18, 18, 18));
         setBackground(NAVY);
 
-        // ================= WEST: Track list =================
+        // ================= WEST: Sort + Track list =================
         listModel = new DefaultListModel<>();
         songList = new JList<String>(listModel) {
             @Override
@@ -84,9 +78,30 @@ public class PlayerPanel extends JPanel {
         songList.setFixedCellHeight(40);
         songList.setCellRenderer(new FloorRenderer());
 
+        // Wrapper: sort dropdown on top, track list below
+        JPanel westWrapper = new JPanel(new BorderLayout(0, 8));
+        westWrapper.setOpaque(false);
+
+        sortComboBox = new JComboBox<>(new String[]{
+            "Title (A→Z)",
+            "Title (Z→A)",
+            "Artist (A→Z)",
+            "Artist (Z→A)",
+            "Year (Old→New)",
+            "Year (New→Old)"
+        });
+        sortComboBox.setFont(font(Font.BOLD, 12));
+        sortComboBox.setBackground(NAVY);
+        sortComboBox.setForeground(TEXT_LIGHT);
+        sortComboBox.setFocusable(false);
+        sortComboBox.setBorder(BorderFactory.createLineBorder(new Color(0, 110, 170), 1));
+        westWrapper.add(sortComboBox, BorderLayout.NORTH);
+
         HudPanel listBox = new HudPanel(TXT_TRACKS, plainScroll(songList));
-        listBox.setPreferredSize(new Dimension(270, 0));
-        add(listBox, BorderLayout.WEST);
+        westWrapper.add(listBox, BorderLayout.CENTER);
+
+        westWrapper.setPreferredSize(new Dimension(270, 0));
+        add(westWrapper, BorderLayout.WEST);
 
         // ================= CENTER: Album art =================
         JPanel centerPanel = new JPanel(new BorderLayout(0, 6));
@@ -135,7 +150,7 @@ public class PlayerPanel extends JPanel {
         lyricsBox.setPreferredSize(new Dimension(310, 0));
         add(lyricsBox, BorderLayout.EAST);
 
-        // ================= SOUTH: Sliders + Controls =================
+        // ================= SOUTH =================
         JPanel southPanel = new JPanel(new BorderLayout(10, 10));
         southPanel.setOpaque(false);
 
@@ -199,16 +214,12 @@ public class PlayerPanel extends JPanel {
         add(southPanel, BorderLayout.SOUTH);
     }
 
-    // ================= Dark Hour mode =================
-
-    /** true = song playing (green Dark Hour tint), false = stopped/paused (cyan). */
     public void setPlaying(boolean isPlaying) {
         this.playing = isPlaying;
         progressSlider.repaint();
         volumeSlider.repaint();
         repaint();
     }
-    // ================= Background =================
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -219,7 +230,6 @@ public class PlayerPanel extends JPanel {
         g2.setPaint(new GradientPaint(0, 0, BG_TOP, 0, h, playing ? BG_BOTTOM_DH : BG_BOTTOM));
         g2.fillRect(0, 0, w, h);
 
-        // faint diagonal shards, like the P3 menu backdrop
         g2.setColor(alpha(playing ? DARK_HOUR : ACCENT, 9));
         int dx = (int) (h * 0.6);
         for (int x = -dx; x < w; x += 110) {
@@ -229,8 +239,6 @@ public class PlayerPanel extends JPanel {
         g2.dispose();
     }
 
-    // ================= Helpers =================
-
     private JScrollPane plainScroll(Component view) {
         JScrollPane sp = new JScrollPane(view,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -238,7 +246,6 @@ public class PlayerPanel extends JPanel {
         sp.setBorder(null);
         sp.setOpaque(false);
         sp.getViewport().setOpaque(false);
-        // simple scrolling avoids ghosting over translucent backgrounds
         sp.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
         JScrollBar vb = sp.getVerticalScrollBar();
         vb.setUI(new SlimScrollBarUI());
@@ -283,8 +290,6 @@ public class PlayerPanel extends JPanel {
         return button;
     }
 
-    // ================= HUD panel (thin border + header + left bar) =================
-
     private class HudPanel extends JPanel {
         private final String title;
 
@@ -311,8 +316,8 @@ public class PlayerPanel extends JPanel {
             g2.drawRect(0, 0, w - 1, h - 1);
 
             g2.setColor(accent());
-            g2.fillRect(0, 0, 46, 2);          // bright tab on the top edge
-            g2.fillRect(2, 32, 4, h - 35);     // left accent bar
+            g2.fillRect(0, 0, 46, 2);
+            g2.fillRect(2, 32, 4, h - 35);
 
             g2.setFont(font(Font.BOLD | Font.ITALIC, 14));
             FontMetrics fm = g2.getFontMetrics();
@@ -330,8 +335,6 @@ public class PlayerPanel extends JPanel {
         }
     }
 
-    // ================= Album art frame (double border + glow) =================
-
     private class ArtFrame extends JPanel {
         ArtFrame(JComponent content) {
             super(new BorderLayout());
@@ -344,7 +347,7 @@ public class PlayerPanel extends JPanel {
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             int w = getWidth(), h = getHeight();
-            for (int k = 0; k < 4; k++) {          // soft outer glow
+            for (int k = 0; k < 4; k++) {
                 g2.setColor(alpha(accent(), 12 + k * 14));
                 g2.drawRect(k, k, w - 1 - 2 * k, h - 1 - 2 * k);
             }
@@ -354,8 +357,6 @@ public class PlayerPanel extends JPanel {
             g2.dispose();
         }
     }
-
-    // ================= Track renderer =================
 
     private class FloorRenderer extends JComponent implements ListCellRenderer<String> {
         private String number = "", title = "";
@@ -388,7 +389,6 @@ public class PlayerPanel extends JPanel {
                 g2.fillRect(0, 0, w, h);
                 g2.setColor(Color.WHITE);
                 g2.fillRect(0, 0, 5, h);
-                // play marker drawn as a shape (no font glyph needed)
                 g2.setColor(onAccent());
                 int cy = h / 2;
                 g2.fillPolygon(new int[]{14, 14, 22}, new int[]{cy - 5, cy + 5, cy}, 3);
@@ -419,8 +419,6 @@ public class PlayerPanel extends JPanel {
         }
     }
 
-    // ================= Slim scrollbar =================
-
     private class SlimScrollBarUI extends BasicScrollBarUI {
         @Override protected JButton createDecreaseButton(int o) { return zeroButton(); }
         @Override protected JButton createIncreaseButton(int o) { return zeroButton(); }
@@ -447,8 +445,6 @@ public class PlayerPanel extends JPanel {
             g.fillRect(r.x + 1, r.y, r.width - 2, r.height);
         }
     }
-
-    // ================= Diamond-thumb slider =================
 
     private class DiamondSliderUI extends BasicSliderUI {
         DiamondSliderUI(JSlider s) { super(s); }

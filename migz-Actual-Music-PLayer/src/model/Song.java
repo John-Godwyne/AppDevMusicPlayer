@@ -11,24 +11,35 @@ public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String title;
     private String artist;
     private String filePath;
     private String imagePath;
-    
-    // CHANGED: Use TEXT column to allow long lyrics (up to 65,000 chars)
+
+    private Integer releaseYear;
+    private String genre;
+    private String composer;
+
     @Column(columnDefinition = "TEXT")
     private String lyrics;
 
-    public Song() {} 
+    public Song() {}
 
     public Song(String title, String artist, String filePath, String imagePath, String lyrics) {
+        this(title, artist, filePath, imagePath, lyrics, 0, "Unknown", "Unknown");
+    }
+
+    public Song(String title, String artist, String filePath, String imagePath, String lyrics,
+                int releaseYear, String genre, String composer) {
         this.title = title;
         this.artist = artist;
         this.filePath = filePath;
         this.imagePath = imagePath;
         this.lyrics = lyrics;
+        this.releaseYear = releaseYear;
+        this.genre = genre;
+        this.composer = composer;
     }
 
     public Long getId() { return id; }
@@ -37,9 +48,23 @@ public class Song {
     public String getFilePath() { return filePath; }
     public String getImagePath() { return imagePath; }
     public String getLyrics() { return lyrics; }
-    
+    public Integer getReleaseYear() { return releaseYear; }
+    public String getGenre() { return genre; }
+    public String getComposer() { return composer; }
+
     public void setLyrics(String lyrics) { this.lyrics = lyrics; }
 
-    @Override
-    public String toString() { return title + " - " + artist; }
+        @Override
+    public String toString() {
+        // Never show "Unknown Artist" — fall back to composer, then title
+        String displayArtist = (artist == null || artist.isEmpty()
+                || artist.equalsIgnoreCase("Unknown Artist"))
+                ? (composer != null && !composer.isEmpty()
+                    && !composer.equalsIgnoreCase("Unknown")
+                        ? composer
+                        : title)
+                : artist;
+
+        return title + "  —  " + displayArtist;
+    }
 }

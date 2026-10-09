@@ -1,22 +1,38 @@
 package view;
 
-import java.awt.*;
+import model.Song;
+import persistence.DatabaseManager;
+
 import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
 public class MainFrame extends JFrame {
     public PlayerPanel playerPanel;
+    public CategoryPanel categoryPanel;
 
     public MainFrame() {
-        
         setTitle("Migz Music Player");
-        setSize(1100, 700); // Slightly bigger for better spacing
+        setSize(1100, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
-        
-        // Set the background color of the frame
-        getContentPane().setBackground(new Color(30, 30, 30));
-        
+
+        getContentPane().setBackground(new Color(2, 10, 30));
+
+        List<Song> songs = DatabaseManager.getAllSongs();
+
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        tabs.setBackground(new Color(2, 10, 30));
+        tabs.setForeground(new Color(230, 250, 255));
+
         playerPanel = new PlayerPanel();
-        add(playerPanel);
+        categoryPanel = new CategoryPanel(songs);
+
+        tabs.addTab("// PLAYER",  playerPanel);
+        tabs.addTab("// BROWSE BY CATEGORY", categoryPanel);
+
+        add(tabs);
     }
 }

@@ -38,13 +38,19 @@ public class PlayerController {
         }
 
         initController();
-        // Volume slider: update audio volume + display % when dragged
+
+        // Volume slider
         panel.volumeSlider.addChangeListener(e -> {
             int value = panel.volumeSlider.getValue();
             float volume = value / 100f;
             audioEngine.setVolume(volume);
             panel.volumeLabel.setText(value + "%");
         });
+
+        // NEW: Sort dropdown
+        panel.sortComboBox.addActionListener(e -> applySort());
+        applySort();   // <-- initial sort on startup
+
         initProgressTimer();
     }
 
@@ -64,33 +70,27 @@ public class PlayerController {
         currentIndex = index;
         panel.songList.setSelectedIndex(index);
         Song song = playlist.getSongs().get(index);
-        
-        // Load lyrics from file dynamically
+
         String lyricsPath = "resources/lyrics/" + song.getTitle() + ".txt";
         song.setLyrics(persistence.LyricsLoader.loadLyrics(lyricsPath));
-        
+
         audioEngine.play(song.getFilePath());
         panel.setPlaying(true);
-        panel.playButton.setText("[||] Pause"); // Reflect current playing state
+        panel.playButton.setText("[||] Pause");
         fireSongChangeEvent(song, SongChangeEvent.Type.TRACK_CHANGED);
         fireSongChangeEvent(song, SongChangeEvent.Type.PLAYING);
     }
 
     private void initController() {
-        // Click a song in the list -> load & play it
         panel.songList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int index = panel.songList.getSelectedIndex();
-                if (index != -1) {
-                    loadAndPlay(index);
-                }
+                if (index != -1) loadAndPlay(index);
             }
         });
 
-        // ============ COMBINED PLAY / PAUSE TOGGLE ============
         panel.playButton.addActionListener(e -> {
-            // If nothing loaded, select the highlighted song
             if (currentIndex == -1) {
                 int index = panel.songList.getSelectedIndex();
                 if (index != -1) {
@@ -104,36 +104,32 @@ public class PlayerController {
             Song current = playlist.getSongs().get(currentIndex);
 
             if (audioEngine.isPaused()) {
-                // PAUSED -> resume, switch label to Pause
                 audioEngine.resume();
-                panel.setPlaying(true);   // <-- add
+                panel.setPlaying(true);
                 panel.playButton.setText("[||] Pause");
                 fireSongChangeEvent(current, SongChangeEvent.Type.PLAYING);
             } else if (audioEngine.isPlaying()) {
-                // PLAYING -> pause, switch label to Play
                 audioEngine.pause();
-                panel.setPlaying(false);   // <-- add
+                panel.setPlaying(false);
                 panel.playButton.setText("[>] Play");
                 fireSongChangeEvent(current, SongChangeEvent.Type.PAUSED);
             } else {
-                // STOPPED -> play from beginning, switch label to Pause
                 audioEngine.play(current.getFilePath());
-                panel.setPlaying(true);   // <-- add
+                panel.setPlaying(true);
                 panel.playButton.setText("[||] Pause");
                 fireSongChangeEvent(current, SongChangeEvent.Type.PLAYING);
             }
         });
 
-        // Stop button
         panel.stopButton.addActionListener(e -> {
             audioEngine.stop();
-            panel.playButton.setText("▶ Play"); // Reset toggle label
+            panel.playButton.setText("▶ Play");
+            panel.setPlaying(false);
             if (currentIndex != -1) {
                 fireSongChangeEvent(playlist.getSongs().get(currentIndex), SongChangeEvent.Type.STOPPED);
             }
         });
 
-        // Next / Prev
         panel.nextButton.addActionListener(e -> {
             if (playlist.getSongs().isEmpty()) return;
             int nextIndex = (currentIndex + 1) % playlist.getSongs().size();
@@ -146,12 +142,9 @@ public class PlayerController {
             loadAndPlay(prevIndex);
         });
 
-        // Progress slider: seek when user drags & releases
         panel.progressSlider.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
-                userIsDraggingSlider = true;
-            }
+            public void mousePressed(MouseEvent e) { userIsDraggingSlider = true; }
 
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -162,6 +155,56 @@ public class PlayerController {
                 userIsDraggingSlider = false;
             }
         });
+    }
+
+    // ============ SORT LOGIC ============
+    private void applySort() {
+        String choice = (String) panel.sortComboBox.getSelectedItem();
+        if (choice == null) return;
+
+        // Remember which song was playing so we can find it again after sorting
+        Long playingId = (currentIndex != -1 && currentIndex < playlist.getSongs().size())
+                ? playlist.getSongs().get(currentIndex).getId() : null;
+
+        switch (choice) {
+            case "Title (A→Z)":
+                playlist.getSongs().sort((a, b) -> a.getTitle().compareToIgnoreCase(b.getTitle()));
+                break;
+            case "Title (Z→A)":
+                playlist.getSongs().sort((a, b) -> b.getTitle().compareToIgnoreCase(a.getTitle()));
+                break;
+            case "Artist (A→Z)":
+                playlist.getSongs().sort((a, b) -> a.getArtist().compareToIgnoreCase(b.getArtist()));
+                break;
+            case "Artist (Z→A)":
+                playlist.getSongs().sort((a, b) -> b.getArtist().compareToIgnoreCase(a.getArtist()));
+                break;
+            case "Year (Old→New)":
+                playlist.getSongs().sort((a, b) -> Integer.compare(
+                    a.getReleaseYear() == null ? 0 : a.getReleaseYear(),
+                    b.getReleaseYear() == null ? 0 : b.getReleaseYear()));
+                break;
+            case "Year (New→Old)":
+                playlist.getSongs().sort((a, b) -> Integer.compare(
+                    b.getReleaseYear() == null ? 0 : b.getReleaseYear(),
+                    a.getReleaseYear() == null ? 0 : a.getReleaseYear()));
+                break;
+        }
+
+        // Rebuild the list UI
+        panel.listModel.clear();
+        for (Song s : playlist.getSongs()) panel.listModel.addElement(s.toString());
+
+        // Re-find the currently playing song in the new ordering
+        if (playingId != null) {
+            for (int i = 0; i < playlist.getSongs().size(); i++) {
+                if (playingId.equals(playlist.getSongs().get(i).getId())) {
+                    currentIndex = i;
+                    panel.songList.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 
     private void initProgressTimer() {
