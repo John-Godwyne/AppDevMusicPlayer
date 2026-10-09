@@ -2,18 +2,16 @@ package controller;
 
 import events.SongChangeEvent;
 import events.SongChangeListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.*;
 import model.Playlist;
 import model.Song;
 import persistence.DatabaseManager;
 import view.MainFrame;
 import view.PlayerPanel;
-
-import javax.swing.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.SwingUtilities;
 
 public class PlayerController {
     private MainFrame view;
@@ -76,8 +74,6 @@ public class PlayerController {
         panel.songList.setSelectedIndex(index);
         Song song = playlist.getSongs().get(index);
 
-        String lyricsPath = "resources/lyrics/" + song.getTitle() + ".txt";
-        song.setLyrics(persistence.LyricsLoader.loadLyrics(lyricsPath));
 
         audioEngine.play(song.getFilePath());
         panel.setPlaying(true);
