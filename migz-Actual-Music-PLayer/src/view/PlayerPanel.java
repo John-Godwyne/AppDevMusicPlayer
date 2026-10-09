@@ -24,7 +24,7 @@ public class PlayerPanel extends JPanel {
     public JComboBox<String> sortComboBox;   // NEW
 
     private static final String TXT_TRACKS      = "// TRACK SELECT";
-    private static final String TXT_LYRICS      = "// LYRICS DATA";
+    private static final String TXT_LYRICS      = "// LYRICS";
     private static final String TXT_IDLE        = "The Moment is Dark and Silent";
     private static final String TXT_PLACEHOLDER = "Select a Tune to Vibe";
 
@@ -82,14 +82,15 @@ public class PlayerPanel extends JPanel {
         JPanel westWrapper = new JPanel(new BorderLayout(0, 8));
         westWrapper.setOpaque(false);
 
-        sortComboBox = new JComboBox<>(new String[]{
-            "Title (A→Z)",
-            "Title (Z→A)",
-            "Artist (A→Z)",
-            "Artist (Z→A)",
-            "Year (Old→New)",
-            "Year (New→Old)"
+                sortComboBox = new JComboBox<>(new String[]{
+            "Title (A-Z)",
+            "Title (Z-A)",
+            "Artist (A-Z)",
+            "Artist (Z-A)",
+            "Year (Old-New)",
+            "Year (New-Old)"
         });
+        
         sortComboBox.setFont(font(Font.BOLD, 12));
         sortComboBox.setBackground(NAVY);
         sortComboBox.setForeground(TEXT_LIGHT);

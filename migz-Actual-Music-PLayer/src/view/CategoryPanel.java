@@ -12,6 +12,17 @@ import java.util.function.Function;
 
 public class CategoryPanel extends JPanel {
 
+    // ---------- Callback for "user clicked a song" ----------
+    public interface SongSelectedListener {
+        void songSelected(Song song);
+    }
+
+    private SongSelectedListener songSelectedListener;
+
+    public void setSongSelectedListener(SongSelectedListener listener) {
+        this.songSelectedListener = listener;
+    }
+
     // P3 FES palette
     private final Color BG_TOP      = new Color(1, 6, 20);
     private final Color BG_BOTTOM   = new Color(4, 26, 64);
@@ -19,8 +30,6 @@ public class CategoryPanel extends JPanel {
     private final Color NAVY        = new Color(2, 10, 30);
     private final Color TEXT_LIGHT  = new Color(230, 250, 255);
     private final Color TEXT_MUTED  = new Color(120, 170, 200);
-    private final Color ICE         = new Color(190, 240, 255);
-    private final Color MOON        = new Color(255, 236, 160);
     private final Color ACCENT      = new Color(0, 170, 230);
     private final Color BORDER      = new Color(0, 110, 170);
 
@@ -85,8 +94,19 @@ public class CategoryPanel extends JPanel {
         songList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         songList.setSelectionBackground(ACCENT);
         songList.setSelectionForeground(NAVY);
-        songList.setFixedCellHeight(72);   // taller for thumbnails
+        songList.setFixedCellHeight(72);
         songList.setCellRenderer(new SongThumbnailRenderer());
+
+        // ---- Click-to-play callback ----
+        songList.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                Song clicked = songList.getSelectedValue();
+                if (clicked != null && songSelectedListener != null) {
+                    songSelectedListener.songSelected(clicked);
+                }
+            }
+        });
 
         JScrollPane songScroll = new JScrollPane(songList);
         songScroll.setBorder(BorderFactory.createTitledBorder(
@@ -158,25 +178,24 @@ public class CategoryPanel extends JPanel {
                 thumb.setFont(FONT_TITLE);
             }
 
-                       // ---- Text column ----
+            // ---- Text column ----
             JPanel textCol = new JPanel(new BorderLayout());
             textCol.setOpaque(false);
 
-            String titleText = (song == null) ? "" : song.getTitle();
+            String titleText  = (song == null) ? "" : song.getTitle();
             String artistText = (song == null) ? "" : song.getArtist();
-            String yearText  = (song == null) ? "" : String.valueOf(song.getReleaseYear());
+            String yearText   = (song == null) ? "" : String.valueOf(song.getReleaseYear());
 
             JLabel titleLabel = new JLabel(titleText);
             titleLabel.setFont(FONT_TITLE);
             titleLabel.setForeground(isSelected ? NAVY : TEXT_LIGHT);
 
-            // Build the sub-line as HTML so we can style the year in a muted tone
             String subHtml = String.format(
                 "<html><span style='color:%s;'>%s</span>"
                 + " <span style='color:%s;'>· %s</span></html>",
-                isSelected ? "#0a1930" : "#9bbfe0",   // artist color
+                isSelected ? "#0a1930" : "#9bbfe0",
                 escapeHtml(artistText),
-                isSelected ? "#0a1930" : "#6a8aa8",   // year color
+                isSelected ? "#0a1930" : "#6a8aa8",
                 yearText
             );
             JLabel subLabel = new JLabel(subHtml);
@@ -201,10 +220,11 @@ public class CategoryPanel extends JPanel {
         g2.fillRect(0, 0, w, h);
         g2.dispose();
     }
-        private String escapeHtml(String s) {
-            if (s == null) return "";
-            return s.replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;");
+
+    private String escapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 }

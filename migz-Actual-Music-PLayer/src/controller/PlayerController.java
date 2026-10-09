@@ -24,6 +24,7 @@ public class PlayerController {
     private int currentIndex = -1;
     private Timer progressTimer;
     private boolean userIsDraggingSlider = false;
+    private boolean hasAutoAdvanced = false;
 
     public PlayerController(MainFrame view) {
         this.view = view;
@@ -65,9 +66,12 @@ public class PlayerController {
         }
     }
 
+    
+
     private void loadAndPlay(int index) {
         if (index < 0 || index >= playlist.getSongs().size()) return;
         currentIndex = index;
+        hasAutoAdvanced = false;
         panel.songList.setSelectedIndex(index);
         Song song = playlist.getSongs().get(index);
 
@@ -79,6 +83,33 @@ public class PlayerController {
         panel.playButton.setText("[||] Pause");
         fireSongChangeEvent(song, SongChangeEvent.Type.TRACK_CHANGED);
         fireSongChangeEvent(song, SongChangeEvent.Type.PLAYING);
+    }
+
+        /**
+     * Called from the Category panel when a song is clicked.
+     * Finds the song in the current playlist and plays it by index.
+     */
+    public void playSongByObject(Song song) {
+        if (song == null) return;
+
+        List<Song> songs = playlist.getSongs();
+        for (int i = 0; i < songs.size(); i++) {
+            if (songs.get(i).getId() != null
+                    && songs.get(i).getId().equals(song.getId())) {
+                loadAndPlay(i);
+                return;
+            }
+        }
+
+        // Fallback if IDs are not available: match by title + artist
+        for (int i = 0; i < songs.size(); i++) {
+            Song s = songs.get(i);
+            if (s.getTitle().equals(song.getTitle())
+                    && s.getArtist().equals(song.getArtist())) {
+                loadAndPlay(i);
+                return;
+            }
+        }
     }
 
     private void initController() {
@@ -166,25 +197,25 @@ public class PlayerController {
         Long playingId = (currentIndex != -1 && currentIndex < playlist.getSongs().size())
                 ? playlist.getSongs().get(currentIndex).getId() : null;
 
-        switch (choice) {
-            case "Title (A→Z)":
+                switch (choice) {
+            case "Title (A-Z)":
                 playlist.getSongs().sort((a, b) -> a.getTitle().compareToIgnoreCase(b.getTitle()));
                 break;
-            case "Title (Z→A)":
+            case "Title (Z-A)":
                 playlist.getSongs().sort((a, b) -> b.getTitle().compareToIgnoreCase(a.getTitle()));
                 break;
-            case "Artist (A→Z)":
+            case "Artist (A-Z)":
                 playlist.getSongs().sort((a, b) -> a.getArtist().compareToIgnoreCase(b.getArtist()));
                 break;
-            case "Artist (Z→A)":
+            case "Artist (Z-A)":
                 playlist.getSongs().sort((a, b) -> b.getArtist().compareToIgnoreCase(a.getArtist()));
                 break;
-            case "Year (Old→New)":
+            case "Year (Old-New)":
                 playlist.getSongs().sort((a, b) -> Integer.compare(
                     a.getReleaseYear() == null ? 0 : a.getReleaseYear(),
                     b.getReleaseYear() == null ? 0 : b.getReleaseYear()));
                 break;
-            case "Year (New→Old)":
+            case "Year (New-Old)":
                 playlist.getSongs().sort((a, b) -> Integer.compare(
                     b.getReleaseYear() == null ? 0 : b.getReleaseYear(),
                     a.getReleaseYear() == null ? 0 : a.getReleaseYear()));
