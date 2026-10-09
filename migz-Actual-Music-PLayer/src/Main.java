@@ -65,43 +65,12 @@ public class Main {
             view.setVisible(true);
         });
     }
-
-    private static void seedDatabase() {
-        DatabaseManager.saveSong(new Song(
-            "A Man Without Love", "Engelbert Humperdinck",
-            "resources/audio/A Man Without Love.wav",
-            "resources/images/A Man Without Love.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/A Man Without Love.txt")
-        ));
-        
-        DatabaseManager.saveSong(new Song(
-            "Human ft. SF-A2 Miki", "PinocchioP",
-            "resources/audio/Human ft. SF-A2 Miki.wav",
-            "resources/images/Human ft. SF-A2 Miki.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/Human ft. SF-A2 Miki.txt")
-        ));
-        
-        DatabaseManager.saveSong(new Song(
-            "Isang Pag-Ibig", "APO Hiking Society",
-            "resources/audio/Isang Pag-Ibig.wav",
-            "resources/images/Isang Pag-Ibig.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/Isang Pag-Ibig.txt")
-        ));
-        
-        DatabaseManager.saveSong(new Song(
-            "Multo", "Cup of Joe",
-            "resources/audio/Multo.wav",
-            "resources/images/Multo.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/Multo.txt")
-        ));
-        
-        DatabaseManager.saveSong(new Song(
-            "Pompeii", "Bastille",
-            "resources/audio/Pompeii.wav",
-            "resources/images/Pompeii.jpg",
-            persistence.LyricsLoader.loadLyrics("resources/lyrics/Pompeii.txt")
-        ));
-        
-        System.out.println("Database seeded with 5 songs.");
+       private static void seedDatabase() {
+        System.out.println("Scanning folders for songs...");
+        java.util.List<Song> scanned = persistence.SongScanner.scanAll();
+        for (Song s : scanned) {
+            DatabaseManager.saveSong(s);
+        }
+        System.out.println("Database seeded with " + scanned.size() + " songs.");
     }
 }
