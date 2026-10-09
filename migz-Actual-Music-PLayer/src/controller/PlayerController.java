@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.SwingUtilities;
 
 public class PlayerController {
     private MainFrame view;
@@ -243,10 +244,18 @@ public class PlayerController {
             if (audioEngine.isPlaying() && !userIsDraggingSlider) {
                 long duration = audioEngine.getDurationMicros();
                 long position = audioEngine.getPositionMicros();
+
                 if (duration > 0) {
                     int percent = (int) ((position * 100) / duration);
                     panel.progressSlider.setValue(percent);
                     panel.timeLabel.setText(formatTime(position) + " / " + formatTime(duration));
+
+                    // ---- Auto-advance when the song is within 500ms of ending ----
+                    if (duration - position < 500_000 && !hasAutoAdvanced && currentIndex != -1) {
+                        hasAutoAdvanced = true;
+                        int nextIndex = (currentIndex + 1) % playlist.getSongs().size();
+                        SwingUtilities.invokeLater(() -> loadAndPlay(nextIndex));
+                    }
                 }
             }
         });

@@ -33,7 +33,7 @@ public class Main {
             MainFrame view = new MainFrame();
             PlayerController controller = new PlayerController(view);
 
-            // ---- Custom event listener for updating the player UI ----
+            // ---- Custom event listener for updating the playe    r UI ----
             controller.addSongChangeListener(new SongChangeListener() {
                 @Override
                 public void songChanged(SongChangeEvent event) {
